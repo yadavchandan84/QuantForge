@@ -1,6 +1,7 @@
 # Core backtesting library: quantforge_core
 add_library(quantforge_core
     event.cpp
+    data_handler.cpp
 )
 
 target_include_directories(quantforge_core
