@@ -1,0 +1,67 @@
+# Build directories
+build/
+build-*/
+out/
+cmake-build-*/
+_deps/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+*.cmake.stamp
+
+# Compiled objects / binaries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+*.whl
+.venv/
+venv/
+env/
+.Python
+_skbuild/
+*.so.*
+
+# pybind11 compiled module
+quantforge*.pyd
+quantforge/_core*.pyd
+python/quantforge/_core*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Test / benchmark artifacts
+*.log
+results/
+*.csv.out
+equity_curve_*.csv
+
+# Downloaded market data (keep small sample committed under examples/data)
+data/raw/
+*.parquet
