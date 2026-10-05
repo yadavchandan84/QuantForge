@@ -6,6 +6,7 @@ add_library(quantforge_core
     execution_handler.cpp
     portfolio.cpp
     analytics.cpp
+    engine.cpp
 )
 
 target_include_directories(quantforge_core

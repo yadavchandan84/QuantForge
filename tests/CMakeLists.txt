@@ -10,6 +10,7 @@ add_executable(quantforge_tests
     test_execution.cpp
     test_portfolio.cpp
     test_analytics.cpp
+    test_engine_sweep.cpp
 )
 
 target_link_libraries(quantforge_tests

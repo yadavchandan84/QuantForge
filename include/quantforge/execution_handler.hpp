@@ -44,6 +44,12 @@ class ExecutionHandler {
                      std::unique_ptr<FeeModel> fee, ExecutionConfig cfg = {},
                      std::uint64_t seed = 0);
 
+    // Movable (owns unique_ptr policies), not copyable. Use clone() for copies.
+    ExecutionHandler(ExecutionHandler&&) noexcept = default;
+    ExecutionHandler& operator=(ExecutionHandler&&) noexcept = default;
+    ExecutionHandler(const ExecutionHandler&) = delete;
+    ExecutionHandler& operator=(const ExecutionHandler&) = delete;
+
     /// Deep-copies the handler (clones policies) and reseeds its RNG. Used by
     /// parameter sweeps so each worker runs an independent, deterministic copy.
     ExecutionHandler clone(std::uint64_t seed) const;
