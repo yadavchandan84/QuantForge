@@ -7,6 +7,7 @@ add_executable(quantforge_tests
     test_event_queue.cpp
     test_data_handler.cpp
     test_strategies.cpp
+    test_execution.cpp
 )
 
 target_link_libraries(quantforge_tests

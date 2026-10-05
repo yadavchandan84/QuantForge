@@ -3,6 +3,7 @@ add_library(quantforge_core
     event.cpp
     data_handler.cpp
     strategies.cpp
+    execution_handler.cpp
 )
 
 target_include_directories(quantforge_core
