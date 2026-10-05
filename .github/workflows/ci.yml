@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build + run the full test suite with GCC and Clang (Release).
+  # ---------------------------------------------------------------------------
+  build-test:
+    name: build & test (${{ matrix.cc }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cc: gcc
+            cxx: g++
+          - cc: clang
+            cxx: clang++
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang
+
+      - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  # ---------------------------------------------------------------------------
+  # AddressSanitizer + UndefinedBehaviorSanitizer (Debug).
+  # ---------------------------------------------------------------------------
+  sanitizers:
+    name: sanitizers (ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Configure (sanitizers on)
+        env:
+          CC: gcc
+          CXX: g++
+        run: >
+          cmake -S . -B build-asan -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DQF_ENABLE_SANITIZERS=ON
+
+      - name: Build
+        run: cmake --build build-asan
+
+      - name: Test under sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: ctest --test-dir build-asan --output-on-failure
+
+  # ---------------------------------------------------------------------------
+  # Style: clang-format (dry-run) and clang-tidy over the core sources.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: clang-format & clang-tidy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang-format clang-tidy
+
+      - name: clang-format (check only)
+        run: |
+          files=$(find include src tests benchmarks python -name '*.hpp' -o -name '*.cpp' | sort)
+          echo "Checking formatting on:"; echo "$files"
+          clang-format --dry-run --Werror $files
+
+      - name: Configure for clang-tidy (compile_commands.json)
+        env:
+          CC: clang
+          CXX: clang++
+        run: cmake -S . -B build-tidy -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: clang-tidy (core sources)
+        run: |
+          files=$(find src -name '*.cpp' | sort)
+          clang-tidy -p build-tidy $files
+
+  # ---------------------------------------------------------------------------
+  # Python: build the wheel via scikit-build-core and smoke-test the import.
+  # ---------------------------------------------------------------------------
+  python:
+    name: python wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+          python -m pip install --upgrade pip
+          python -m pip install numpy
+
+      - name: Install package
+        run: python -m pip install . -v
+
+      - name: Smoke test
+        run: |
+          python - <<'PY'
+          import numpy as np, quantforge as qf
+          n = 300
+          ts = (np.arange(n) * 86_400_000_000_000).astype(np.int64)
+          close = 100 + np.cumsum(np.random.default_rng(0).normal(0, 1, n))
+          bars = {"ts": ts, "open": close, "high": close + 1, "low": close - 1,
+                  "close": close, "volume": np.full(n, 1e6)}
+          r = qf.run_backtest(bars, "ma_crossover", {"fast": 10, "slow": 30}, seed=42)
+          assert len(r["equity"]) == n, r
+          # Determinism: same seed -> identical equity path.
+          r2 = qf.run_backtest(bars, "ma_crossover", {"fast": 10, "slow": 30}, seed=42)
+          assert np.array_equal(r["equity"], r2["equity"])
+          print("python smoke test OK; final equity", round(r["final_equity"], 2))
+          PY
