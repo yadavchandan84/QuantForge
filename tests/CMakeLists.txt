@@ -9,6 +9,7 @@ add_executable(quantforge_tests
     test_strategies.cpp
     test_execution.cpp
     test_portfolio.cpp
+    test_analytics.cpp
 )
 
 target_link_libraries(quantforge_tests
