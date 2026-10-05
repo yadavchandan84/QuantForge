@@ -4,6 +4,7 @@
 
 **An event-driven backtesting and trading simulator with a C++20 core and Python bindings.**
 
+[![CI](https://github.com/yadavchandan84/QuantForge/actions/workflows/ci.yml/badge.svg)](https://github.com/yadavchandan84/QuantForge/actions/workflows/ci.yml)
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)
 ![CMake](https://img.shields.io/badge/build-CMake-064F8C?logo=cmake)
@@ -291,6 +292,21 @@ class BuyTheDip final : public qf::Strategy {
 
 **Requirements:** CMake 3.20 or newer, a C++20 compiler (GCC 11+, Clang 14+, or MSVC 2022), and
 Ninja (recommended). GoogleTest and pybind11 are downloaded automatically with `FetchContent`.
+
+```bash
+git clone https://github.com/yadavchandan84/QuantForge.git
+cd QuantForge
+```
+
+### One-command check (Windows)
+
+[`scripts/run_all.ps1`](scripts/run_all.ps1) builds everything, runs the tests and benchmarks,
+installs the Python package if needed, runs [`examples/demo.py`](examples/demo.py), and prints a
+PASS/FAIL summary:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\run_all.ps1
+```
 
 ### C++ library, tests, and benchmarks
 
