@@ -29,9 +29,8 @@ std::vector<MarketEvent> makeBars(std::size_t n, SymbolId sym = 0) {
     bars.reserve(n);
     Timestamp ts = 0;
     for (std::size_t i = 0; i < n; ++i) {
-        const double base =
-            100.0 + 8.0 * std::sin(static_cast<double>(i) * 0.25) +
-            3.0 * std::cos(static_cast<double>(i) * 0.11);
+        const double base = 100.0 + 8.0 * std::sin(static_cast<double>(i) * 0.25) +
+                            3.0 * std::cos(static_cast<double>(i) * 0.11);
         MarketEvent m;
         m.ts = ts;
         m.symbol = sym;
@@ -53,19 +52,23 @@ ExecutionHandler randomExec(std::uint64_t seed) {
     // Random slippage (price) + random latency (timing) both consume the RNG,
     // so the seed materially changes fills -- making replay determinism a
     // meaningful guarantee and different seeds genuinely diverge.
-    return ExecutionHandler(
-        std::make_unique<RandomLatency>(0, 5 * kNanosPerMinute),
-        std::make_unique<RandomBpsSlippage>(2.0, 25.0),
-        std::make_unique<PerShareFee>(0.005), ExecutionConfig{}, seed);
+    return ExecutionHandler(std::make_unique<RandomLatency>(0, 5 * kNanosPerMinute),
+                            std::make_unique<RandomBpsSlippage>(2.0, 25.0),
+                            std::make_unique<PerShareFee>(0.005), ExecutionConfig{}, seed);
 }
 
 bool sameResult(const BacktestResult& a, const BacktestResult& b) {
-    if (a.equity_curve.size() != b.equity_curve.size()) return false;
-    if (a.final_equity != b.final_equity) return false;
-    if (a.num_fills != b.num_fills) return false;
+    if (a.equity_curve.size() != b.equity_curve.size())
+        return false;
+    if (a.final_equity != b.final_equity)
+        return false;
+    if (a.num_fills != b.num_fills)
+        return false;
     for (std::size_t i = 0; i < a.equity_curve.size(); ++i) {
-        if (a.equity_curve[i].ts != b.equity_curve[i].ts) return false;
-        if (a.equity_curve[i].equity != b.equity_curve[i].equity) return false;
+        if (a.equity_curve[i].ts != b.equity_curve[i].ts)
+            return false;
+        if (a.equity_curve[i].equity != b.equity_curve[i].equity)
+            return false;
     }
     return true;
 }
@@ -122,10 +125,9 @@ TEST(Determinism, SweepWithRandomnessIdenticalAcrossThreads) {
         BacktestConfig cfg;
         cfg.seed = 500 + static_cast<std::uint64_t>(i);  // seed tied to index
         cfg.target_position = 100.0;
-        return SweepJob{
-            std::make_unique<CsvBarDataHandler>(makeBars(150)),
-            std::make_unique<MovingAverageCrossover>(0, 3 + i % 4, 12 + i % 6),
-            randomExec(cfg.seed), cfg};
+        return SweepJob{std::make_unique<CsvBarDataHandler>(makeBars(150)),
+                        std::make_unique<MovingAverageCrossover>(0, 3 + i % 4, 12 + i % 6),
+                        randomExec(cfg.seed), cfg};
     };
 
     auto r1 = runSweep(num_jobs, factory, 1);

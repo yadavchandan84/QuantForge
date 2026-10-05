@@ -36,10 +36,8 @@ std::vector<MarketEvent> barsFromArrays(const py::array_t<std::int64_t>& ts,
                                         const py::array_t<double>& close,
                                         const py::array_t<double>& volume) {
     auto n = static_cast<std::size_t>(ts.size());
-    if (static_cast<std::size_t>(open.size()) != n ||
-        static_cast<std::size_t>(high.size()) != n ||
-        static_cast<std::size_t>(low.size()) != n ||
-        static_cast<std::size_t>(close.size()) != n ||
+    if (static_cast<std::size_t>(open.size()) != n || static_cast<std::size_t>(high.size()) != n ||
+        static_cast<std::size_t>(low.size()) != n || static_cast<std::size_t>(close.size()) != n ||
         static_cast<std::size_t>(volume.size()) != n) {
         throw std::invalid_argument("all bar arrays must have the same length");
     }
@@ -67,8 +65,7 @@ std::vector<MarketEvent> barsFromArrays(const py::array_t<std::int64_t>& ts,
     return bars;
 }
 
-std::unique_ptr<Strategy> makeStrategy(const std::string& name,
-                                       const py::dict& params) {
+std::unique_ptr<Strategy> makeStrategy(const std::string& name, const py::dict& params) {
     auto getU = [&](const char* key, std::size_t dflt) -> std::size_t {
         return params.contains(key) ? params[key].cast<std::size_t>() : dflt;
     };
@@ -77,46 +74,38 @@ std::unique_ptr<Strategy> makeStrategy(const std::string& name,
     };
 
     if (name == "ma_crossover") {
-        return std::make_unique<MovingAverageCrossover>(0, getU("fast", 10),
-                                                        getU("slow", 30));
+        return std::make_unique<MovingAverageCrossover>(0, getU("fast", 10), getU("slow", 30));
     }
     if (name == "mean_reversion") {
-        return std::make_unique<MeanReversion>(0, getU("lookback", 20),
-                                               getD("entry_z", 1.5),
+        return std::make_unique<MeanReversion>(0, getU("lookback", 20), getD("entry_z", 1.5),
                                                getD("exit_z", 0.5));
     }
     if (name == "market_maker") {
-        return std::make_unique<MarketMaker>(0, getU("fair_lookback", 20),
-                                             getD("band", 0.01),
+        return std::make_unique<MarketMaker>(0, getU("fair_lookback", 20), getD("band", 0.01),
                                              getD("max_inventory", 5.0));
     }
     throw std::invalid_argument("unknown strategy '" + name + "'");
 }
 
 std::unique_ptr<LatencyModel> makeLatency(const py::dict& spec) {
-    const std::string kind =
-        spec.contains("kind") ? spec["kind"].cast<std::string>() : "fixed";
+    const std::string kind = spec.contains("kind") ? spec["kind"].cast<std::string>() : "fixed";
     if (kind == "fixed") {
-        const Timestamp ns =
-            spec.contains("ns") ? spec["ns"].cast<Timestamp>() : 0;
+        const Timestamp ns = spec.contains("ns") ? spec["ns"].cast<Timestamp>() : 0;
         return std::make_unique<FixedLatency>(ns);
     }
     if (kind == "random") {
-        const Timestamp lo =
-            spec.contains("min_ns") ? spec["min_ns"].cast<Timestamp>() : 0;
-        const Timestamp hi =
-            spec.contains("max_ns") ? spec["max_ns"].cast<Timestamp>() : 0;
+        const Timestamp lo = spec.contains("min_ns") ? spec["min_ns"].cast<Timestamp>() : 0;
+        const Timestamp hi = spec.contains("max_ns") ? spec["max_ns"].cast<Timestamp>() : 0;
         return std::make_unique<RandomLatency>(lo, hi);
     }
     throw std::invalid_argument("unknown latency kind '" + kind + "'");
 }
 
 std::unique_ptr<SlippageModel> makeSlippage(const py::dict& spec) {
-    const std::string kind =
-        spec.contains("kind") ? spec["kind"].cast<std::string>() : "fixed_bps";
+    const std::string kind = spec.contains("kind") ? spec["kind"].cast<std::string>() : "fixed_bps";
     if (kind == "fixed_bps") {
-        return std::make_unique<FixedBpsSlippage>(
-            spec.contains("bps") ? spec["bps"].cast<double>() : 0.0);
+        return std::make_unique<FixedBpsSlippage>(spec.contains("bps") ? spec["bps"].cast<double>()
+                                                                       : 0.0);
     }
     if (kind == "volume") {
         return std::make_unique<VolumeSlippage>(
@@ -131,15 +120,13 @@ std::unique_ptr<SlippageModel> makeSlippage(const py::dict& spec) {
 }
 
 std::unique_ptr<FeeModel> makeFee(const py::dict& spec) {
-    const std::string kind =
-        spec.contains("kind") ? spec["kind"].cast<std::string>() : "per_share";
+    const std::string kind = spec.contains("kind") ? spec["kind"].cast<std::string>() : "per_share";
     if (kind == "per_share") {
-        return std::make_unique<PerShareFee>(
-            spec.contains("fee") ? spec["fee"].cast<double>() : 0.0);
+        return std::make_unique<PerShareFee>(spec.contains("fee") ? spec["fee"].cast<double>()
+                                                                  : 0.0);
     }
     if (kind == "bps") {
-        return std::make_unique<BpsFee>(
-            spec.contains("bps") ? spec["bps"].cast<double>() : 0.0);
+        return std::make_unique<BpsFee>(spec.contains("bps") ? spec["bps"].cast<double>() : 0.0);
     }
     throw std::invalid_argument("unknown fee kind '" + kind + "'");
 }
@@ -147,8 +134,7 @@ std::unique_ptr<FeeModel> makeFee(const py::dict& spec) {
 ExecutionHandler makeExecution(const py::dict& latency, const py::dict& slippage,
                                const py::dict& fee, const ExecutionConfig& cfg,
                                std::uint64_t seed) {
-    return ExecutionHandler(makeLatency(latency), makeSlippage(slippage),
-                            makeFee(fee), cfg, seed);
+    return ExecutionHandler(makeLatency(latency), makeSlippage(slippage), makeFee(fee), cfg, seed);
 }
 
 // Converts a BacktestResult into a Python dict with NumPy arrays.
@@ -229,13 +215,11 @@ RiskLimits riskFrom(const py::dict& d) {
 // ---- High-level entry point ----------------------------------------------
 
 py::dict runBacktest(py::array_t<std::int64_t> ts, py::array_t<double> open,
-                     py::array_t<double> high, py::array_t<double> low,
-                     py::array_t<double> close, py::array_t<double> volume,
-                     const std::string& strategy, py::dict strategy_params,
-                     py::dict latency, py::dict slippage, py::dict fee,
+                     py::array_t<double> high, py::array_t<double> low, py::array_t<double> close,
+                     py::array_t<double> volume, const std::string& strategy,
+                     py::dict strategy_params, py::dict latency, py::dict slippage, py::dict fee,
                      py::dict execution_cfg, py::dict risk, double initial_cash,
-                     double target_position, double periods_per_year,
-                     std::uint64_t seed) {
+                     double target_position, double periods_per_year, std::uint64_t seed) {
     auto bars = barsFromArrays(ts, open, high, low, close, volume);
     CsvBarDataHandler data(std::move(bars));
     auto strat = makeStrategy(strategy, strategy_params);
@@ -260,23 +244,19 @@ PYBIND11_MODULE(_core, m) {
     m.doc() = "QuantForge: event-driven backtesting & trading simulator (C++ core)";
     m.attr("__version__") = "0.1.0";
 
-    py::enum_<Side>(m, "Side")
-        .value("Buy", Side::Buy)
-        .value("Sell", Side::Sell);
+    py::enum_<Side>(m, "Side").value("Buy", Side::Buy).value("Sell", Side::Sell);
     py::enum_<SignalDirection>(m, "SignalDirection")
         .value("Long", SignalDirection::Long)
         .value("Short", SignalDirection::Short)
         .value("Exit", SignalDirection::Exit);
 
-    m.def("run_backtest", &runBacktest, py::arg("ts"), py::arg("open"),
-          py::arg("high"), py::arg("low"), py::arg("close"), py::arg("volume"),
-          py::arg("strategy"), py::arg("strategy_params") = py::dict(),
-          py::arg("latency") = py::dict(), py::arg("slippage") = py::dict(),
-          py::arg("fee") = py::dict(), py::arg("execution_cfg") = py::dict(),
-          py::arg("risk") = py::dict(), py::arg("initial_cash") = 100000.0,
-          py::arg("target_position") = 100.0,
-          py::arg("periods_per_year") = kTradingDaysPerYear,
-          py::arg("seed") = 0,
+    m.def("run_backtest", &runBacktest, py::arg("ts"), py::arg("open"), py::arg("high"),
+          py::arg("low"), py::arg("close"), py::arg("volume"), py::arg("strategy"),
+          py::arg("strategy_params") = py::dict(), py::arg("latency") = py::dict(),
+          py::arg("slippage") = py::dict(), py::arg("fee") = py::dict(),
+          py::arg("execution_cfg") = py::dict(), py::arg("risk") = py::dict(),
+          py::arg("initial_cash") = 100000.0, py::arg("target_position") = 100.0,
+          py::arg("periods_per_year") = kTradingDaysPerYear, py::arg("seed") = 0,
           R"doc(Run a single backtest over OHLCV bar arrays.
 
 Returns a dict with NumPy arrays 'equity_ts', 'equity', 'trade_pnl',

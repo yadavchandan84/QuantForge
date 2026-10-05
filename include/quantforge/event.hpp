@@ -92,10 +92,10 @@ struct FillEvent {
     Timestamp ts{};
     SymbolId symbol{kInvalidSymbol};
     Side side{Side::Buy};
-    Quantity quantity{0.0};  ///< Filled quantity (may be < order quantity).
-    Price fill_price{0.0};   ///< Price after slippage.
-    double commission{0.0};  ///< Fees/commission in account currency.
-    Quantity remaining{0.0}; ///< Unfilled remainder of the originating order.
+    Quantity quantity{0.0};   ///< Filled quantity (may be < order quantity).
+    Price fill_price{0.0};    ///< Price after slippage.
+    double commission{0.0};   ///< Fees/commission in account currency.
+    Quantity remaining{0.0};  ///< Unfilled remainder of the originating order.
     std::uint64_t order_id{0};
 };
 
@@ -111,14 +111,10 @@ struct Event {
 
     Event() = default;
 
-    explicit Event(MarketEvent e)
-        : payload(e), ts(e.ts), priority(EventPriority::Market) {}
-    explicit Event(SignalEvent e)
-        : payload(e), ts(e.ts), priority(EventPriority::Signal) {}
-    explicit Event(OrderEvent e)
-        : payload(e), ts(e.ts), priority(EventPriority::Order) {}
-    explicit Event(FillEvent e)
-        : payload(e), ts(e.ts), priority(EventPriority::Fill) {}
+    explicit Event(MarketEvent e) : payload(e), ts(e.ts), priority(EventPriority::Market) {}
+    explicit Event(SignalEvent e) : payload(e), ts(e.ts), priority(EventPriority::Signal) {}
+    explicit Event(OrderEvent e) : payload(e), ts(e.ts), priority(EventPriority::Order) {}
+    explicit Event(FillEvent e) : payload(e), ts(e.ts), priority(EventPriority::Fill) {}
 };
 
 /// Human-readable name of the active payload alternative. Defined in event.cpp.

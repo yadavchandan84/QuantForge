@@ -1,5 +1,3 @@
-#include "quantforge/strategies.hpp"
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -7,6 +5,7 @@
 
 #include "quantforge/event.hpp"
 #include "quantforge/rolling.hpp"
+#include "quantforge/strategies.hpp"
 #include "quantforge/strategy.hpp"
 #include "quantforge/types.hpp"
 
@@ -24,8 +23,7 @@ MarketEvent bar(Timestamp ts, Price close, SymbolId sym = 0) {
 }
 
 // Drives a strategy over a price path and collects emitted signals.
-std::vector<SignalEvent> run(Strategy& strat, const std::vector<Price>& prices,
-                             SymbolId sym = 0) {
+std::vector<SignalEvent> run(Strategy& strat, const std::vector<Price>& prices, SymbolId sym = 0) {
     std::vector<SignalEvent> signals;
     auto sink = [&signals](const SignalEvent& s) { signals.push_back(s); };
     Timestamp ts = 0;
@@ -58,7 +56,8 @@ TEST(RollingWindow, MeanAndStdev) {
 
 TEST(RollingWindow, StdevZeroForConstant) {
     RollingWindow w(4);
-    for (int i = 0; i < 4; ++i) w.push(5.0);
+    for (int i = 0; i < 4; ++i)
+        w.push(5.0);
     EXPECT_DOUBLE_EQ(w.stdev(), 0.0);
 }
 
@@ -66,8 +65,7 @@ TEST(RollingWindow, StdevZeroForConstant) {
 TEST(MovingAverageCrossover, EmitsLongThenShortOnCrosses) {
     MovingAverageCrossover strat(0, /*fast=*/2, /*slow=*/4);
     // Rising then falling path to force an up-cross then a down-cross.
-    std::vector<Price> prices{10, 10, 10, 10, 12, 14, 16, 18,
-                              16, 12, 8,  6,  4,  2};
+    std::vector<Price> prices{10, 10, 10, 10, 12, 14, 16, 18, 16, 12, 8, 6, 4, 2};
     auto sig = run(strat, prices);
 
     ASSERT_GE(sig.size(), 2u);
@@ -75,7 +73,8 @@ TEST(MovingAverageCrossover, EmitsLongThenShortOnCrosses) {
     EXPECT_EQ(sig.front().direction, SignalDirection::Long);
     bool saw_short = false;
     for (const auto& s : sig) {
-        if (s.direction == SignalDirection::Short) saw_short = true;
+        if (s.direction == SignalDirection::Short)
+            saw_short = true;
     }
     EXPECT_TRUE(saw_short);
 }
@@ -130,8 +129,10 @@ TEST(MarketMaker, LeansLongBelowFairAndShortAboveFair) {
     ASSERT_FALSE(sig.empty());
     bool saw_long = false, saw_short = false;
     for (const auto& s : sig) {
-        if (s.direction == SignalDirection::Long) saw_long = true;
-        if (s.direction == SignalDirection::Short) saw_short = true;
+        if (s.direction == SignalDirection::Long)
+            saw_long = true;
+        if (s.direction == SignalDirection::Short)
+            saw_short = true;
     }
     EXPECT_TRUE(saw_long);
     EXPECT_TRUE(saw_short);

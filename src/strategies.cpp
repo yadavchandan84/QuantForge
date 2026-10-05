@@ -8,17 +8,14 @@ namespace qf {
 // ---------------------------------------------------------------------------
 // MovingAverageCrossover
 // ---------------------------------------------------------------------------
-MovingAverageCrossover::MovingAverageCrossover(SymbolId symbol, std::size_t fast,
-                                               std::size_t slow)
+MovingAverageCrossover::MovingAverageCrossover(SymbolId symbol, std::size_t fast, std::size_t slow)
     : symbol_(symbol), fast_(fast), slow_(slow) {
     if (fast == 0 || slow == 0 || fast >= slow) {
-        throw std::invalid_argument(
-            "MovingAverageCrossover requires 0 < fast < slow");
+        throw std::invalid_argument("MovingAverageCrossover requires 0 < fast < slow");
     }
 }
 
-void MovingAverageCrossover::onMarket(const MarketEvent& ev,
-                                      const StrategyContext& ctx) {
+void MovingAverageCrossover::onMarket(const MarketEvent& ev, const StrategyContext& ctx) {
     if (ev.symbol != symbol_) {
         return;
     }
@@ -51,17 +48,17 @@ void MovingAverageCrossover::reset() {
     last_state_ = 0;
 }
 
-std::string MovingAverageCrossover::name() const { return "MovingAverageCrossover"; }
+std::string MovingAverageCrossover::name() const {
+    return "MovingAverageCrossover";
+}
 
 // ---------------------------------------------------------------------------
 // MeanReversion
 // ---------------------------------------------------------------------------
-MeanReversion::MeanReversion(SymbolId symbol, std::size_t lookback, double entry_z,
-                             double exit_z)
+MeanReversion::MeanReversion(SymbolId symbol, std::size_t lookback, double entry_z, double exit_z)
     : symbol_(symbol), window_(lookback), entry_z_(entry_z), exit_z_(exit_z) {
     if (entry_z <= 0.0 || exit_z < 0.0 || exit_z >= entry_z) {
-        throw std::invalid_argument(
-            "MeanReversion requires 0 <= exit_z < entry_z and entry_z > 0");
+        throw std::invalid_argument("MeanReversion requires 0 <= exit_z < entry_z and entry_z > 0");
     }
 }
 
@@ -101,20 +98,18 @@ void MeanReversion::reset() {
     position_ = 0;
 }
 
-std::string MeanReversion::name() const { return "MeanReversion"; }
+std::string MeanReversion::name() const {
+    return "MeanReversion";
+}
 
 // ---------------------------------------------------------------------------
 // MarketMaker
 // ---------------------------------------------------------------------------
 MarketMaker::MarketMaker(SymbolId symbol, std::size_t fair_lookback, double band,
                          double max_inventory)
-    : symbol_(symbol),
-      fair_(fair_lookback),
-      band_(band),
-      max_inventory_(max_inventory) {
+    : symbol_(symbol), fair_(fair_lookback), band_(band), max_inventory_(max_inventory) {
     if (band <= 0.0 || max_inventory <= 0.0) {
-        throw std::invalid_argument(
-            "MarketMaker requires band > 0 and max_inventory > 0");
+        throw std::invalid_argument("MarketMaker requires band > 0 and max_inventory > 0");
     }
 }
 
@@ -170,6 +165,8 @@ void MarketMaker::reset() {
     last_state_ = 0;
 }
 
-std::string MarketMaker::name() const { return "MarketMaker"; }
+std::string MarketMaker::name() const {
+    return "MarketMaker";
+}
 
 }  // namespace qf

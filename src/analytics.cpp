@@ -92,8 +92,7 @@ double maxDrawdown(const std::vector<EquityPoint>& curve) {
     return max_dd;
 }
 
-double annualizedVolatility(const std::vector<double>& returns,
-                            double periods_per_year) {
+double annualizedVolatility(const std::vector<double>& returns, double periods_per_year) {
     if (periods_per_year <= 0.0) {
         return 0.0;
     }
@@ -101,8 +100,7 @@ double annualizedVolatility(const std::vector<double>& returns,
 }
 
 PerformanceReport computeReport(const std::vector<EquityPoint>& curve,
-                                const std::vector<TradeRecord>& trades,
-                                double periods_per_year) {
+                                const std::vector<TradeRecord>& trades, double periods_per_year) {
     PerformanceReport r;
     const auto rets = periodReturns(curve);
     r.num_periods = rets.size();
@@ -124,8 +122,7 @@ PerformanceReport computeReport(const std::vector<EquityPoint>& curve,
     for (const auto& p : curve) {
         sum_eq += p.equity;
     }
-    const double mean_eq =
-        curve.empty() ? 0.0 : sum_eq / static_cast<double>(curve.size());
+    const double mean_eq = curve.empty() ? 0.0 : sum_eq / static_cast<double>(curve.size());
     r.turnover = mean_eq > 0.0 ? traded_notional / mean_eq : 0.0;
 
     // Hit rate over closed trades (those with a realized PnL component).
@@ -140,14 +137,11 @@ PerformanceReport computeReport(const std::vector<EquityPoint>& curve,
         }
     }
     r.num_trades = counted;
-    r.hit_rate = counted > 0 ? static_cast<double>(wins) /
-                                   static_cast<double>(counted)
-                             : 0.0;
+    r.hit_rate = counted > 0 ? static_cast<double>(wins) / static_cast<double>(counted) : 0.0;
     return r;
 }
 
-void writeEquityCurveCsv(const std::string& path,
-                         const std::vector<EquityPoint>& curve) {
+void writeEquityCurveCsv(const std::string& path, const std::vector<EquityPoint>& curve) {
     std::ofstream out(path);
     if (!out) {
         throw std::runtime_error("cannot open '" + path + "' for writing");

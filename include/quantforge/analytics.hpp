@@ -30,13 +30,13 @@ inline constexpr double kMinutesPerYear = kTradingDaysPerYear * 390.0;  // US ca
 
 /// A bundle of performance statistics for a backtest run.
 struct PerformanceReport {
-    double total_return{0.0};       ///< (end/start - 1) on equity.
-    double sharpe{0.0};             ///< annualized.
-    double sortino{0.0};            ///< annualized, downside deviation.
-    double max_drawdown{0.0};       ///< as a positive fraction (0.2 = -20%).
+    double total_return{0.0};  ///< (end/start - 1) on equity.
+    double sharpe{0.0};        ///< annualized.
+    double sortino{0.0};       ///< annualized, downside deviation.
+    double max_drawdown{0.0};  ///< as a positive fraction (0.2 = -20%).
     double annualized_volatility{0.0};
-    double turnover{0.0};           ///< total traded notional / mean equity.
-    double hit_rate{0.0};           ///< fraction of winning closed trades.
+    double turnover{0.0};  ///< total traded notional / mean equity.
+    double hit_rate{0.0};  ///< fraction of winning closed trades.
     std::size_t num_trades{0};
     std::size_t num_periods{0};
 };
@@ -69,20 +69,17 @@ double sortinoRatio(const std::vector<double>& returns, double periods_per_year,
 double maxDrawdown(const std::vector<EquityPoint>& curve);
 
 /// Annualized volatility of periodic returns.
-double annualizedVolatility(const std::vector<double>& returns,
-                            double periods_per_year);
+double annualizedVolatility(const std::vector<double>& returns, double periods_per_year);
 
 // ---- Aggregate report ----------------------------------------------------
 
 /// Computes a full PerformanceReport from an equity curve and trade log.
 /// `periods_per_year` annualizes risk metrics (e.g. 252 for daily bars).
 PerformanceReport computeReport(const std::vector<EquityPoint>& curve,
-                                const std::vector<TradeRecord>& trades,
-                                double periods_per_year);
+                                const std::vector<TradeRecord>& trades, double periods_per_year);
 
 /// Writes the equity curve to a CSV file with header "timestamp,equity".
 /// Throws std::runtime_error on I/O failure.
-void writeEquityCurveCsv(const std::string& path,
-                         const std::vector<EquityPoint>& curve);
+void writeEquityCurveCsv(const std::string& path, const std::vector<EquityPoint>& curve);
 
 }  // namespace qf

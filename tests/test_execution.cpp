@@ -1,11 +1,10 @@
-#include "quantforge/execution_handler.hpp"
-
 #include <gtest/gtest.h>
 
 #include <memory>
 #include <random>
 
 #include "quantforge/event.hpp"
+#include "quantforge/execution_handler.hpp"
 #include "quantforge/execution_models.hpp"
 #include "quantforge/types.hpp"
 
@@ -33,12 +32,10 @@ MarketSnapshot snap(Price ref, Quantity vol) {
     return s;
 }
 
-ExecutionHandler makeHandler(std::unique_ptr<LatencyModel> lat,
-                             std::unique_ptr<SlippageModel> slip,
-                             std::unique_ptr<FeeModel> fee,
-                             ExecutionConfig cfg = {}, std::uint64_t seed = 0) {
-    return ExecutionHandler(std::move(lat), std::move(slip), std::move(fee), cfg,
-                            seed);
+ExecutionHandler makeHandler(std::unique_ptr<LatencyModel> lat, std::unique_ptr<SlippageModel> slip,
+                             std::unique_ptr<FeeModel> fee, ExecutionConfig cfg = {},
+                             std::uint64_t seed = 0) {
+    return ExecutionHandler(std::move(lat), std::move(slip), std::move(fee), cfg, seed);
 }
 
 }  // namespace
@@ -85,9 +82,9 @@ TEST(Fees, PerShareAndBps) {
 
 // ---- Latency ------------------------------------------------------------
 TEST(Latency, FixedAddsToTimestamp) {
-    auto h = makeHandler(std::make_unique<FixedLatency>(500),
-                         std::make_unique<FixedBpsSlippage>(0.0),
-                         std::make_unique<PerShareFee>(0.0));
+    auto h =
+        makeHandler(std::make_unique<FixedLatency>(500), std::make_unique<FixedBpsSlippage>(0.0),
+                    std::make_unique<PerShareFee>(0.0));
     auto f = h.execute(marketOrder(Side::Buy, 10, /*ts=*/1000), snap(100.0, 0.0));
     ASSERT_TRUE(f.has_value());
     EXPECT_EQ(f->ts, 1500);
@@ -105,12 +102,12 @@ TEST(Latency, RandomIsDeterministicForSeed) {
 TEST(Execution, FullFillAppliesSlippageAndFees) {
     ExecutionConfig cfg;
     cfg.fill_on_zero_volume = true;
-    auto h = makeHandler(std::make_unique<FixedLatency>(0),
-                         std::make_unique<FixedBpsSlippage>(10.0),
-                         std::make_unique<BpsFee>(5.0), cfg);
+    auto h =
+        makeHandler(std::make_unique<FixedLatency>(0), std::make_unique<FixedBpsSlippage>(10.0),
+                    std::make_unique<BpsFee>(5.0), cfg);
     auto f = h.execute(marketOrder(Side::Buy, 100.0), snap(100.0, 0.0));
     ASSERT_TRUE(f.has_value());
-    EXPECT_DOUBLE_EQ(f->fill_price, 100.1);          // 10 bps slippage on buy
+    EXPECT_DOUBLE_EQ(f->fill_price, 100.1);  // 10 bps slippage on buy
     EXPECT_DOUBLE_EQ(f->quantity, 100.0);
     EXPECT_DOUBLE_EQ(f->remaining, 0.0);
     EXPECT_DOUBLE_EQ(f->commission, 100.1 * 100.0 * 5.0 * 1e-4);  // on fill price
@@ -119,8 +116,7 @@ TEST(Execution, FullFillAppliesSlippageAndFees) {
 TEST(Execution, PartialFillAgainstVolume) {
     ExecutionConfig cfg;
     cfg.max_participation = 0.1;  // 10% of volume
-    auto h = makeHandler(std::make_unique<FixedLatency>(0),
-                         std::make_unique<FixedBpsSlippage>(0.0),
+    auto h = makeHandler(std::make_unique<FixedLatency>(0), std::make_unique<FixedBpsSlippage>(0.0),
                          std::make_unique<PerShareFee>(0.0), cfg);
     // Order 1000 vs volume 5000 -> max 500 filled, 500 remaining.
     auto f = h.execute(marketOrder(Side::Buy, 1000.0), snap(50.0, 5000.0));
@@ -132,16 +128,14 @@ TEST(Execution, PartialFillAgainstVolume) {
 TEST(Execution, NoFillOnZeroVolumeWhenDisallowed) {
     ExecutionConfig cfg;
     cfg.fill_on_zero_volume = false;
-    auto h = makeHandler(std::make_unique<FixedLatency>(0),
-                         std::make_unique<FixedBpsSlippage>(0.0),
+    auto h = makeHandler(std::make_unique<FixedLatency>(0), std::make_unique<FixedBpsSlippage>(0.0),
                          std::make_unique<PerShareFee>(0.0), cfg);
     auto f = h.execute(marketOrder(Side::Buy, 10.0), snap(100.0, 0.0));
     EXPECT_FALSE(f.has_value());
 }
 
 TEST(Execution, LimitOrderOnlyFillsWhenMarketable) {
-    auto h = makeHandler(std::make_unique<FixedLatency>(0),
-                         std::make_unique<FixedBpsSlippage>(0.0),
+    auto h = makeHandler(std::make_unique<FixedLatency>(0), std::make_unique<FixedBpsSlippage>(0.0),
                          std::make_unique<PerShareFee>(0.0));
     OrderEvent o;
     o.ts = 0;

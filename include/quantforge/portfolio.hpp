@@ -18,16 +18,14 @@ namespace qf {
 struct Position {
     Quantity quantity{0.0};
     Price avg_price{0.0};
-    Price last_price{0.0};   ///< Most recent mark price.
+    Price last_price{0.0};  ///< Most recent mark price.
     double realized_pnl{0.0};
     double total_commission{0.0};
 
     bool isFlat() const noexcept { return quantity == 0.0; }
 
     /// Unrealized PnL at the current mark: (mark - avg) * quantity.
-    double unrealizedPnl() const noexcept {
-        return (last_price - avg_price) * quantity;
-    }
+    double unrealizedPnl() const noexcept { return (last_price - avg_price) * quantity; }
 
     /// Signed market value of the position at the current mark.
     double marketValue() const noexcept { return last_price * quantity; }
@@ -82,9 +80,7 @@ class Portfolio {
 
     const Position& position(SymbolId symbol) const;
     bool hasPosition(SymbolId symbol) const;
-    const std::unordered_map<SymbolId, Position>& positions() const noexcept {
-        return positions_;
-    }
+    const std::unordered_map<SymbolId, Position>& positions() const noexcept { return positions_; }
 
     const RiskLimits& limits() const noexcept { return limits_; }
 
@@ -92,8 +88,7 @@ class Portfolio {
     /// would not breach the per-symbol position limit or gross exposure limit,
     /// given the current `price`. Returns the (possibly reduced) quantity, which
     /// may be 0 if the order must be fully rejected.
-    Quantity clampOrderQuantity(SymbolId symbol, Side side, Quantity desired,
-                                Price price) const;
+    Quantity clampOrderQuantity(SymbolId symbol, Side side, Quantity desired, Price price) const;
 
     void reset();
 

@@ -34,7 +34,8 @@ class LatencyModel {
 class FixedLatency final : public LatencyModel {
   public:
     explicit FixedLatency(Timestamp ns) : ns_(ns) {
-        if (ns < 0) throw std::invalid_argument("FixedLatency must be >= 0");
+        if (ns < 0)
+            throw std::invalid_argument("FixedLatency must be >= 0");
     }
     Timestamp sample(std::mt19937_64&) const override { return ns_; }
     std::unique_ptr<LatencyModel> clone() const override {
@@ -48,8 +49,7 @@ class FixedLatency final : public LatencyModel {
 /// Uniform random latency in [min_ns, max_ns].
 class RandomLatency final : public LatencyModel {
   public:
-    RandomLatency(Timestamp min_ns, Timestamp max_ns)
-        : min_(min_ns), max_(max_ns) {
+    RandomLatency(Timestamp min_ns, Timestamp max_ns) : min_(min_ns), max_(max_ns) {
         if (min_ns < 0 || max_ns < min_ns) {
             throw std::invalid_argument("RandomLatency requires 0 <= min <= max");
         }
@@ -76,8 +76,7 @@ class SlippageModel {
     /// Returns the fill price. `rng` is the handler's single RNG stream; models
     /// that need randomness draw from it so replay is reproducible, while
     /// deterministic models simply ignore it.
-    virtual Price apply(Price reference, Side side, Quantity fill_qty,
-                        Quantity available_volume,
+    virtual Price apply(Price reference, Side side, Quantity fill_qty, Quantity available_volume,
                         std::mt19937_64& rng) const = 0;
     virtual std::unique_ptr<SlippageModel> clone() const = 0;
 };
@@ -86,13 +85,12 @@ class SlippageModel {
 class FixedBpsSlippage final : public SlippageModel {
   public:
     explicit FixedBpsSlippage(double bps) : bps_(bps) {
-        if (bps < 0.0) throw std::invalid_argument("slippage bps must be >= 0");
+        if (bps < 0.0)
+            throw std::invalid_argument("slippage bps must be >= 0");
     }
-    Price apply(Price reference, Side side, Quantity, Quantity,
-                std::mt19937_64&) const override {
+    Price apply(Price reference, Side side, Quantity, Quantity, std::mt19937_64&) const override {
         const double frac = bps_ * 1e-4;
-        return side == Side::Buy ? reference * (1.0 + frac)
-                                 : reference * (1.0 - frac);
+        return side == Side::Buy ? reference * (1.0 + frac) : reference * (1.0 - frac);
     }
     std::unique_ptr<SlippageModel> clone() const override {
         return std::make_unique<FixedBpsSlippage>(*this);
@@ -107,19 +105,16 @@ class FixedBpsSlippage final : public SlippageModel {
 /// replay: identical seeds must reproduce identical fill prices.
 class RandomBpsSlippage final : public SlippageModel {
   public:
-    RandomBpsSlippage(double min_bps, double max_bps)
-        : min_bps_(min_bps), max_bps_(max_bps) {
+    RandomBpsSlippage(double min_bps, double max_bps) : min_bps_(min_bps), max_bps_(max_bps) {
         if (min_bps < 0.0 || max_bps < min_bps) {
-            throw std::invalid_argument(
-                "RandomBpsSlippage requires 0 <= min <= max");
+            throw std::invalid_argument("RandomBpsSlippage requires 0 <= min <= max");
         }
     }
     Price apply(Price reference, Side side, Quantity, Quantity,
                 std::mt19937_64& rng) const override {
         std::uniform_real_distribution<double> dist(min_bps_, max_bps_);
         const double frac = dist(rng) * 1e-4;
-        return side == Side::Buy ? reference * (1.0 + frac)
-                                 : reference * (1.0 - frac);
+        return side == Side::Buy ? reference * (1.0 + frac) : reference * (1.0 - frac);
     }
     std::unique_ptr<SlippageModel> clone() const override {
         return std::make_unique<RandomBpsSlippage>(*this);
@@ -141,16 +136,15 @@ class VolumeSlippage final : public SlippageModel {
         if (coeff_bps < 0.0)
             throw std::invalid_argument("slippage coeff must be >= 0");
     }
-    Price apply(Price reference, Side side, Quantity fill_qty,
-                Quantity available_volume, std::mt19937_64&) const override {
+    Price apply(Price reference, Side side, Quantity fill_qty, Quantity available_volume,
+                std::mt19937_64&) const override {
         double participation = 1.0;
         if (available_volume > 0.0) {
             participation = std::clamp(fill_qty / available_volume, 0.0, 1.0);
         }
         const double impact_bps = coeff_bps_ * std::sqrt(participation);
         const double frac = impact_bps * 1e-4;
-        return side == Side::Buy ? reference * (1.0 + frac)
-                                 : reference * (1.0 - frac);
+        return side == Side::Buy ? reference * (1.0 + frac) : reference * (1.0 - frac);
     }
     std::unique_ptr<SlippageModel> clone() const override {
         return std::make_unique<VolumeSlippage>(*this);
@@ -175,9 +169,7 @@ class PerShareFee final : public FeeModel {
         if (fee_per_share < 0.0)
             throw std::invalid_argument("per-share fee must be >= 0");
     }
-    double commission(Price, Quantity qty) const override {
-        return fee_ * std::abs(qty);
-    }
+    double commission(Price, Quantity qty) const override { return fee_ * std::abs(qty); }
     std::unique_ptr<FeeModel> clone() const override {
         return std::make_unique<PerShareFee>(*this);
     }
@@ -190,14 +182,13 @@ class PerShareFee final : public FeeModel {
 class BpsFee final : public FeeModel {
   public:
     explicit BpsFee(double bps) : bps_(bps) {
-        if (bps < 0.0) throw std::invalid_argument("fee bps must be >= 0");
+        if (bps < 0.0)
+            throw std::invalid_argument("fee bps must be >= 0");
     }
     double commission(Price fill_price, Quantity qty) const override {
         return fill_price * std::abs(qty) * bps_ * 1e-4;
     }
-    std::unique_ptr<FeeModel> clone() const override {
-        return std::make_unique<BpsFee>(*this);
-    }
+    std::unique_ptr<FeeModel> clone() const override { return std::make_unique<BpsFee>(*this); }
 
   private:
     double bps_;

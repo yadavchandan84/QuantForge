@@ -8,8 +8,8 @@ namespace qf {
 
 ExecutionHandler::ExecutionHandler(std::unique_ptr<LatencyModel> latency,
                                    std::unique_ptr<SlippageModel> slippage,
-                                   std::unique_ptr<FeeModel> fee,
-                                   ExecutionConfig cfg, std::uint64_t seed)
+                                   std::unique_ptr<FeeModel> fee, ExecutionConfig cfg,
+                                   std::uint64_t seed)
     : latency_(std::move(latency)),
       slippage_(std::move(slippage)),
       fee_(std::move(fee)),
@@ -25,8 +25,7 @@ ExecutionHandler::ExecutionHandler(std::unique_ptr<LatencyModel> latency,
 }
 
 ExecutionHandler ExecutionHandler::clone(std::uint64_t seed) const {
-    return ExecutionHandler(latency_->clone(), slippage_->clone(), fee_->clone(),
-                            cfg_, seed);
+    return ExecutionHandler(latency_->clone(), slippage_->clone(), fee_->clone(), cfg_, seed);
 }
 
 void ExecutionHandler::reseed(std::uint64_t seed) {
@@ -75,8 +74,7 @@ std::optional<FillEvent> ExecutionHandler::execute(const OrderEvent& order,
 
     // Slippage against the taker. Draw slippage before latency so the RNG
     // consumption order is fixed and replay-stable.
-    const Price fill_price =
-        slippage_->apply(reference, order.side, fill_qty, vol, rng_);
+    const Price fill_price = slippage_->apply(reference, order.side, fill_qty, vol, rng_);
 
     // Latency determines when the fill is observed.
     const Timestamp lat = latency_->sample(rng_);

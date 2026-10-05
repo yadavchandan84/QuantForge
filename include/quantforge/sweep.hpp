@@ -40,8 +40,7 @@ using SweepJobFactory = std::function<SweepJob(std::size_t index)>;
 ///   * each job's RNG seed comes from its config (set by the factory), not from
 ///     wall-clock or thread id;
 ///   * results are placed at a fixed index, never appended in completion order.
-inline std::vector<BacktestResult> runSweep(std::size_t num_jobs,
-                                            const SweepJobFactory& factory,
+inline std::vector<BacktestResult> runSweep(std::size_t num_jobs, const SweepJobFactory& factory,
                                             std::size_t num_threads) {
     std::vector<BacktestResult> results(num_jobs);
 
@@ -51,8 +50,7 @@ inline std::vector<BacktestResult> runSweep(std::size_t num_jobs,
     if (num_threads <= 1) {
         for (std::size_t i = 0; i < num_jobs; ++i) {
             SweepJob job = factory(i);
-            Engine engine(*job.data, *job.strategy, std::move(job.execution),
-                          job.config);
+            Engine engine(*job.data, *job.strategy, std::move(job.execution), job.config);
             results[i] = engine.run();
         }
         return results;
@@ -66,8 +64,7 @@ inline std::vector<BacktestResult> runSweep(std::size_t num_jobs,
     for (std::size_t i = 0; i < num_jobs; ++i) {
         pool.submit([i, &factory, &results, &remaining, &done_mutex, &done_cv] {
             SweepJob job = factory(i);
-            Engine engine(*job.data, *job.strategy, std::move(job.execution),
-                          job.config);
+            Engine engine(*job.data, *job.strategy, std::move(job.execution), job.config);
             results[i] = engine.run();  // fixed index -> order-independent
             if (remaining.fetch_sub(1) == 1) {
                 std::lock_guard<std::mutex> lock(done_mutex);

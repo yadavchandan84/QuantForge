@@ -1,5 +1,3 @@
-#include "quantforge/data_handler.hpp"
-
 #include <gtest/gtest.h>
 
 #include <cstdio>
@@ -9,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "quantforge/data_handler.hpp"
 #include "quantforge/symbol_table.hpp"
 #include "quantforge/types.hpp"
 
@@ -61,8 +60,7 @@ TEST(DataHandler, StreamsInOrderAndFinishes) {
 // pull never reveals a timestamp greater than it should, and that there is no
 // way to observe event k+1 before event k.
 TEST(DataHandler, NoLookaheadByConstruction) {
-    std::vector<MarketEvent> evs{bar(10, 1.0), bar(20, 2.0), bar(30, 3.0),
-                                 bar(40, 4.0)};
+    std::vector<MarketEvent> evs{bar(10, 1.0), bar(20, 2.0), bar(30, 3.0), bar(40, 4.0)};
     CsvBarDataHandler dh(evs);
 
     Timestamp prev = std::numeric_limits<Timestamp>::min();
@@ -88,13 +86,15 @@ TEST(DataHandler, ResetReplaysSameSequence) {
     CsvBarDataHandler dh(evs);
 
     std::vector<Price> run1;
-    while (auto m = dh.next()) run1.push_back(m->close);
+    while (auto m = dh.next())
+        run1.push_back(m->close);
 
     dh.reset();
     EXPECT_FALSE(dh.finished());
 
     std::vector<Price> run2;
-    while (auto m = dh.next()) run2.push_back(m->close);
+    while (auto m = dh.next())
+        run2.push_back(m->close);
 
     EXPECT_EQ(run1, run2);
 }

@@ -32,8 +32,7 @@ class MovingAverageCrossover final : public Strategy {
 /// long when `entry_z` below, and exits when it reverts within `exit_z`.
 class MeanReversion final : public Strategy {
   public:
-    MeanReversion(SymbolId symbol, std::size_t lookback, double entry_z,
-                  double exit_z);
+    MeanReversion(SymbolId symbol, std::size_t lookback, double entry_z, double exit_z);
 
     void onMarket(const MarketEvent& ev, const StrategyContext& ctx) override;
     void reset() override;
@@ -57,8 +56,7 @@ class MeanReversion final : public Strategy {
 /// inventory would exceed `max_inventory` conceptual units.
 class MarketMaker final : public Strategy {
   public:
-    MarketMaker(SymbolId symbol, std::size_t fair_lookback, double band,
-                double max_inventory);
+    MarketMaker(SymbolId symbol, std::size_t fair_lookback, double band, double max_inventory);
 
     void onMarket(const MarketEvent& ev, const StrategyContext& ctx) override;
     void reset() override;

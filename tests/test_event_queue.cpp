@@ -1,10 +1,9 @@
-#include "quantforge/event_queue.hpp"
-
 #include <gtest/gtest.h>
 
 #include <vector>
 
 #include "quantforge/event.hpp"
+#include "quantforge/event_queue.hpp"
 #include "quantforge/types.hpp"
 
 using namespace qf;

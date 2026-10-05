@@ -57,8 +57,8 @@ struct CsvBarOptions {
         EpochSeconds,
         EpochMillis,
         EpochNanos,
-        DateYMD,       ///< "YYYY-MM-DD" -> midnight UTC.
-        DateTimeYMDHMS ///< "YYYY-MM-DD HH:MM:SS" -> UTC.
+        DateYMD,        ///< "YYYY-MM-DD" -> midnight UTC.
+        DateTimeYMDHMS  ///< "YYYY-MM-DD HH:MM:SS" -> UTC.
     } time_format{TimeFormat::DateYMD};
 };
 
@@ -72,8 +72,8 @@ class CsvBarDataHandler final : public DataHandler {
     /// Loads bars for `symbol` from `path`. `symbol` is interned in `symbols`.
     /// Throws std::runtime_error on I/O or parse errors, or if timestamps are
     /// not monotonically non-decreasing.
-    CsvBarDataHandler(const std::string& path, const std::string& symbol,
-                      SymbolTable& symbols, const CsvBarOptions& opts = {});
+    CsvBarDataHandler(const std::string& path, const std::string& symbol, SymbolTable& symbols,
+                      const CsvBarOptions& opts = {});
 
     /// Builds a handler directly from pre-parsed events (used by tests and the
     /// Python bindings). Validates ordering.

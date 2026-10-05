@@ -22,8 +22,7 @@ std::vector<MarketEvent> makeBars(std::size_t n, SymbolId sym = 0) {
     bars.reserve(n);
     Timestamp ts = 0;
     for (std::size_t i = 0; i < n; ++i) {
-        const double base =
-            100.0 + 10.0 * std::sin(static_cast<double>(i) * 0.3);
+        const double base = 100.0 + 10.0 * std::sin(static_cast<double>(i) * 0.3);
         MarketEvent m;
         m.ts = ts;
         m.symbol = sym;
@@ -41,8 +40,7 @@ std::vector<MarketEvent> makeBars(std::size_t n, SymbolId sym = 0) {
 
 std::unique_ptr<ExecutionHandler> makeExec(std::uint64_t seed) {
     return std::make_unique<ExecutionHandler>(
-        std::make_unique<FixedLatency>(0),
-        std::make_unique<FixedBpsSlippage>(1.0),
+        std::make_unique<FixedLatency>(0), std::make_unique<FixedBpsSlippage>(1.0),
         std::make_unique<PerShareFee>(0.005), ExecutionConfig{}, seed);
 }
 
@@ -107,10 +105,8 @@ TEST(Sweep, DeterministicAcrossThreadCounts) {
         cfg.target_position = 100.0;
         return SweepJob{
             std::make_unique<CsvBarDataHandler>(makeBars(120)),
-            std::make_unique<MovingAverageCrossover>(0, params[i].first,
-                                                     params[i].second),
-            std::move(*makeExec(/*seed=*/1000 + static_cast<std::uint64_t>(i))),
-            cfg};
+            std::make_unique<MovingAverageCrossover>(0, params[i].first, params[i].second),
+            std::move(*makeExec(/*seed=*/1000 + static_cast<std::uint64_t>(i))), cfg};
     };
 
     auto r1 = runSweep(num_jobs, factory, /*threads=*/1);
@@ -142,8 +138,7 @@ TEST(Sweep, SingleThreadMatchesPerJobEngine) {
         cfg.seed = static_cast<std::uint64_t>(i);
         return SweepJob{std::make_unique<CsvBarDataHandler>(makeBars(50)),
                         std::make_unique<MovingAverageCrossover>(0, 2, 10),
-                        std::move(*makeExec(static_cast<std::uint64_t>(i))),
-                        cfg};
+                        std::move(*makeExec(static_cast<std::uint64_t>(i))), cfg};
     };
     auto swept = runSweep(3, factory, 4);
     ASSERT_EQ(swept.size(), 3u);

@@ -1,16 +1,14 @@
-#include "quantforge/portfolio.hpp"
-
 #include <gtest/gtest.h>
 
 #include "quantforge/event.hpp"
+#include "quantforge/portfolio.hpp"
 #include "quantforge/types.hpp"
 
 using namespace qf;
 
 namespace {
 
-FillEvent fill(Side side, Quantity qty, Price price, double commission = 0.0,
-               SymbolId sym = 0) {
+FillEvent fill(Side side, Quantity qty, Price price, double commission = 0.0, SymbolId sym = 0) {
     FillEvent f;
     f.ts = 0;
     f.symbol = sym;
@@ -76,8 +74,8 @@ TEST(Portfolio, AveragesCostOnPyramiding) {
 
 TEST(Portfolio, CrossThroughZeroOpensOppositeSide) {
     Portfolio p(100000.0);
-    p.onFill(fill(Side::Buy, 100, 10.0));          // long 100 @ 10
-    p.onFill(fill(Side::Sell, 150, 12.0));         // sell 150: close 100, open short 50
+    p.onFill(fill(Side::Buy, 100, 10.0));   // long 100 @ 10
+    p.onFill(fill(Side::Sell, 150, 12.0));  // sell 150: close 100, open short 50
     // Realized on 100 closed long: (12 - 10) * 100 = 200
     EXPECT_DOUBLE_EQ(p.realizedPnl(), 200.0);
     EXPECT_DOUBLE_EQ(p.position(0).quantity, -50.0);

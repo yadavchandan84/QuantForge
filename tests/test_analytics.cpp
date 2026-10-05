@@ -1,5 +1,3 @@
-#include "quantforge/analytics.hpp"
-
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -8,6 +6,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "quantforge/analytics.hpp"
 
 using namespace qf;
 
@@ -29,7 +29,7 @@ TEST(Analytics, PeriodReturns) {
     auto c = curveFrom({100.0, 110.0, 99.0});
     auto r = periodReturns(c);
     ASSERT_EQ(r.size(), 2u);
-    EXPECT_NEAR(r[0], 0.10, 1e-12);       // 110/100 - 1
+    EXPECT_NEAR(r[0], 0.10, 1e-12);  // 110/100 - 1
     EXPECT_NEAR(r[1], 99.0 / 110.0 - 1.0, 1e-12);
 }
 
@@ -85,8 +85,8 @@ TEST(Analytics, ReportHitRateAndTurnover) {
     };
     auto rep = computeReport(c, trades, 252.0);
 
-    EXPECT_EQ(rep.num_trades, 3u);                 // zero-PnL excluded
-    EXPECT_NEAR(rep.hit_rate, 2.0 / 3.0, 1e-12);   // 2 wins of 3
+    EXPECT_EQ(rep.num_trades, 3u);                // zero-PnL excluded
+    EXPECT_NEAR(rep.hit_rate, 2.0 / 3.0, 1e-12);  // 2 wins of 3
 
     // Turnover = total notional / mean equity = 2000 / 105.
     EXPECT_NEAR(rep.turnover, 2000.0 / 105.0, 1e-9);

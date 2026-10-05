@@ -57,8 +57,7 @@ BacktestResult Engine::run() {
     result_.final_equity = portfolio_.equity();
     result_.final_cash = portfolio_.cash();
     result_.total_commission = portfolio_.totalCommission();
-    result_.report =
-        computeReport(result_.equity_curve, result_.trades, cfg_.periods_per_year);
+    result_.report = computeReport(result_.equity_curve, result_.trades, cfg_.periods_per_year);
     return result_;
 }
 
@@ -78,8 +77,7 @@ void Engine::handleMarket(const MarketEvent& m) {
 
     // Feed the strategy. Signals it emits are pushed onto the queue (at Signal
     // priority) so they are processed after all market events at this instant.
-    StrategyContext ctx(
-        m.ts, [this](const SignalEvent& s) { queue_.emit(s); }, strategy_.id());
+    StrategyContext ctx(m.ts, [this](const SignalEvent& s) { queue_.emit(s); }, strategy_.id());
     strategy_.onMarket(m, ctx);
 }
 
@@ -115,8 +113,7 @@ void Engine::handleSignal(const SignalEvent& s) {
     if (auto it = snapshots_.find(s.symbol); it != snapshots_.end()) {
         ref = it->second.reference;
     }
-    const Quantity sized =
-        portfolio_.clampOrderQuantity(s.symbol, side, desired, ref);
+    const Quantity sized = portfolio_.clampOrderQuantity(s.symbol, side, desired, ref);
     if (sized <= 0.0) {
         return;
     }

@@ -13,8 +13,8 @@ namespace qf {
 /// Snapshot of the market for one symbol at the moment an order is executed.
 /// Supplied by the engine from the most recent MarketEvent.
 struct MarketSnapshot {
-    Price reference{0.0};      ///< Mid/close/last used as the base fill price.
-    Quantity volume{0.0};      ///< Available volume this bar/tick (for impact).
+    Price reference{0.0};  ///< Mid/close/last used as the base fill price.
+    Quantity volume{0.0};  ///< Available volume this bar/tick (for impact).
     Price bid{0.0};
     Price ask{0.0};
 };
@@ -39,8 +39,7 @@ struct ExecutionConfig {
 /// seeded RNG the handler owns, so a fixed seed yields identical fills.
 class ExecutionHandler {
   public:
-    ExecutionHandler(std::unique_ptr<LatencyModel> latency,
-                     std::unique_ptr<SlippageModel> slippage,
+    ExecutionHandler(std::unique_ptr<LatencyModel> latency, std::unique_ptr<SlippageModel> slippage,
                      std::unique_ptr<FeeModel> fee, ExecutionConfig cfg = {},
                      std::uint64_t seed = 0);
 
@@ -57,8 +56,7 @@ class ExecutionHandler {
     /// Executes `order` against `snap`. Returns a FillEvent, or nullopt if the
     /// order could not fill at all (e.g. no volume and fill_on_zero_volume is
     /// false, or a non-marketable limit order).
-    std::optional<FillEvent> execute(const OrderEvent& order,
-                                     const MarketSnapshot& snap);
+    std::optional<FillEvent> execute(const OrderEvent& order, const MarketSnapshot& snap);
 
     /// Resets the RNG to the configured seed (for deterministic replay).
     void reseed(std::uint64_t seed);

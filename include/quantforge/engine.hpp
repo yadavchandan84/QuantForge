@@ -59,8 +59,7 @@ struct BacktestResult {
 /// causal order at every timestamp.
 class Engine {
   public:
-    Engine(DataHandler& data, Strategy& strategy, ExecutionHandler execution,
-           BacktestConfig cfg);
+    Engine(DataHandler& data, Strategy& strategy, ExecutionHandler execution, BacktestConfig cfg);
 
     /// Runs the full backtest and returns the result. Resets strategy,
     /// portfolio, data cursor and RNG first, so the same Engine can be re-run

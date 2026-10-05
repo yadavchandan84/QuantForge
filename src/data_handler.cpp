@@ -4,8 +4,8 @@
 #include <cctype>
 #include <charconv>
 #include <cstdlib>
-#include <limits>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -42,8 +42,10 @@ double parseDouble(const std::string& s) {
 std::string trim(std::string_view sv) {
     std::size_t b = 0;
     std::size_t e = sv.size();
-    while (b < e && std::isspace(static_cast<unsigned char>(sv[b]))) ++b;
-    while (e > b && std::isspace(static_cast<unsigned char>(sv[e - 1]))) --e;
+    while (b < e && std::isspace(static_cast<unsigned char>(sv[b])))
+        ++b;
+    while (e > b && std::isspace(static_cast<unsigned char>(sv[e - 1])))
+        --e;
     return std::string(sv.substr(b, e - b));
 }
 
@@ -91,10 +93,9 @@ Timestamp parseTimestamp(const std::string& field, CsvBarOptions::TimeFormat fmt
             if (y == 0 && mo == 0 && d == 0) {
                 throw std::runtime_error("CSV: bad date '" + field + "'");
             }
-            const std::int64_t days = daysFromCivil(y, static_cast<unsigned>(mo),
-                                                    static_cast<unsigned>(d));
-            const std::int64_t secs =
-                days * 86400 + h * 3600 + mi * 60 + s;
+            const std::int64_t days =
+                daysFromCivil(y, static_cast<unsigned>(mo), static_cast<unsigned>(d));
+            const std::int64_t secs = days * 86400 + h * 3600 + mi * 60 + s;
             return static_cast<Timestamp>(secs) * kNanosPerSecond;
         }
     }
@@ -128,11 +129,10 @@ CsvBarDataHandler::CsvBarDataHandler(const std::string& path, const std::string&
         first = false;
 
         const auto cols = splitRow(line, opts.delimiter);
-        const int max_col = std::max({opts.ts_col, opts.open_col, opts.high_col,
-                                      opts.low_col, opts.close_col, opts.volume_col});
+        const int max_col = std::max({opts.ts_col, opts.open_col, opts.high_col, opts.low_col,
+                                      opts.close_col, opts.volume_col});
         if (static_cast<int>(cols.size()) <= max_col) {
-            throw std::runtime_error("CSV: too few columns at line " +
-                                     std::to_string(line_no));
+            throw std::runtime_error("CSV: too few columns at line " + std::to_string(line_no));
         }
 
         MarketEvent m;
@@ -150,8 +150,7 @@ CsvBarDataHandler::CsvBarDataHandler(const std::string& path, const std::string&
     validateOrdering();
 }
 
-CsvBarDataHandler::CsvBarDataHandler(std::vector<MarketEvent> events)
-    : events_(std::move(events)) {
+CsvBarDataHandler::CsvBarDataHandler(std::vector<MarketEvent> events) : events_(std::move(events)) {
     if (!events_.empty()) {
         symbol_id_ = events_.front().symbol;
     }
@@ -175,10 +174,16 @@ std::optional<MarketEvent> CsvBarDataHandler::next() {
     return events_[cursor_++];
 }
 
-bool CsvBarDataHandler::finished() const { return cursor_ >= events_.size(); }
+bool CsvBarDataHandler::finished() const {
+    return cursor_ >= events_.size();
+}
 
-std::size_t CsvBarDataHandler::size() const { return events_.size(); }
+std::size_t CsvBarDataHandler::size() const {
+    return events_.size();
+}
 
-void CsvBarDataHandler::reset() { cursor_ = 0; }
+void CsvBarDataHandler::reset() {
+    cursor_ = 0;
+}
 
 }  // namespace qf

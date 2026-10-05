@@ -41,8 +41,7 @@ class ScriptedStrategy final : public Strategy {
         SignalDirection dir;
     };
 
-    explicit ScriptedStrategy(std::vector<Entry> script)
-        : script_(std::move(script)) {}
+    explicit ScriptedStrategy(std::vector<Entry> script) : script_(std::move(script)) {}
 
     void onMarket(const MarketEvent&, const StrategyContext& ctx) override {
         for (const auto& e : script_) {
@@ -81,8 +80,7 @@ ExecutionHandler frictionless() {
 //   bar3 close=25, Exit  -> sell 10@25  -> realized (25-10)*10=150, cash 100150
 //   final equity 100150, realized 150
 TEST(KnownAnswer, LongThenExitEndToEnd) {
-    std::vector<MarketEvent> bars{bar(0, 10.0), bar(1, 20.0), bar(2, 15.0),
-                                  bar(3, 25.0)};
+    std::vector<MarketEvent> bars{bar(0, 10.0), bar(1, 20.0), bar(2, 15.0), bar(3, 25.0)};
     CsvBarDataHandler data(bars);
     ScriptedStrategy strat({{0, SignalDirection::Long}, {3, SignalDirection::Exit}});
 
@@ -148,8 +146,8 @@ TEST(KnownAnswer, CostedRoundTripEndToEnd) {
     ExecutionConfig ecfg;
     ecfg.fill_on_zero_volume = true;
     ExecutionHandler exec(std::make_unique<FixedLatency>(0),
-                          std::make_unique<FixedBpsSlippage>(5.0),
-                          std::make_unique<BpsFee>(10.0), ecfg, 0);
+                          std::make_unique<FixedBpsSlippage>(5.0), std::make_unique<BpsFee>(10.0),
+                          ecfg, 0);
 
     Engine engine(data, strat, std::move(exec), cfg);
     auto res = engine.run();
@@ -164,8 +162,8 @@ TEST(KnownAnswer, CostedRoundTripEndToEnd) {
 // can never be a future bar's price. We assert the strategy only ever observes
 // closes up to and including the current bar.
 TEST(KnownAnswer, EngineNeverLeaksFuturePrices) {
-    std::vector<MarketEvent> bars{bar(0, 10.0), bar(1, 11.0), bar(2, 12.0),
-                                  bar(3, 13.0), bar(4, 14.0)};
+    std::vector<MarketEvent> bars{bar(0, 10.0), bar(1, 11.0), bar(2, 12.0), bar(3, 13.0),
+                                  bar(4, 14.0)};
 
     // Recording strategy: capture (index, close) seen on each onMarket call.
     class Recorder final : public Strategy {

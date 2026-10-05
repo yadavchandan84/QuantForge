@@ -26,8 +26,7 @@ void Portfolio::onFill(const FillEvent& fill) {
     Position& pos = mutablePosition(fill.symbol);
 
     // Signed traded quantity: + for buys, - for sells.
-    const double signed_qty =
-        (fill.side == Side::Buy ? 1.0 : -1.0) * fill.quantity;
+    const double signed_qty = (fill.side == Side::Buy ? 1.0 : -1.0) * fill.quantity;
 
     // Cash: buying costs cash, selling adds cash; commission always reduces.
     cash_ -= fill.fill_price * signed_qty;
@@ -42,8 +41,7 @@ void Portfolio::onFill(const FillEvent& fill) {
         pos.avg_price = fill.fill_price;
     } else if ((old_qty > 0.0) == (signed_qty > 0.0)) {
         // Increasing an existing position on the same side: blend avg cost.
-        const double total_cost =
-            pos.avg_price * old_qty + fill.fill_price * signed_qty;
+        const double total_cost = pos.avg_price * old_qty + fill.fill_price * signed_qty;
         pos.avg_price = total_cost / new_qty;
     } else {
         // Reducing, closing, or crossing through zero.
@@ -89,7 +87,9 @@ double Portfolio::grossExposure() const {
     return gross;
 }
 
-double Portfolio::totalPnl() const { return equity() - initial_cash_; }
+double Portfolio::totalPnl() const {
+    return equity() - initial_cash_;
+}
 
 double Portfolio::realizedPnl() const {
     double r = 0.0;
@@ -126,8 +126,8 @@ bool Portfolio::hasPosition(SymbolId symbol) const {
     return positions_.find(symbol) != positions_.end();
 }
 
-Quantity Portfolio::clampOrderQuantity(SymbolId symbol, Side side,
-                                       Quantity desired, Price price) const {
+Quantity Portfolio::clampOrderQuantity(SymbolId symbol, Side side, Quantity desired,
+                                       Price price) const {
     if (desired <= 0.0) {
         return 0.0;
     }
@@ -156,9 +156,8 @@ Quantity Portfolio::clampOrderQuantity(SymbolId symbol, Side side,
         const double headroom = limits_.max_gross_exposure - current_gross;
         if (headroom <= 0.0) {
             // Only allow orders that reduce the existing position.
-            const bool reduces =
-                (pos.quantity > 0.0 && side == Side::Sell) ||
-                (pos.quantity < 0.0 && side == Side::Buy);
+            const bool reduces = (pos.quantity > 0.0 && side == Side::Sell) ||
+                                 (pos.quantity < 0.0 && side == Side::Buy);
             if (!reduces) {
                 return 0.0;
             }

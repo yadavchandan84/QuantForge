@@ -22,9 +22,8 @@ static std::vector<MarketEvent> makeBars(std::size_t n) {
     bars.reserve(n);
     Timestamp ts = 0;
     for (std::size_t i = 0; i < n; ++i) {
-        const double base =
-            100.0 + 10.0 * std::sin(static_cast<double>(i) * 0.01) +
-            5.0 * std::sin(static_cast<double>(i) * 0.013);
+        const double base = 100.0 + 10.0 * std::sin(static_cast<double>(i) * 0.01) +
+                            5.0 * std::sin(static_cast<double>(i) * 0.013);
         MarketEvent m;
         m.ts = ts;
         m.symbol = 0;
@@ -65,8 +64,8 @@ int main(int argc, char** argv) {
     const auto t1 = std::chrono::steady_clock::now();
 
     const double secs = std::chrono::duration<double>(t1 - t0).count();
-    const std::size_t total_events = res.num_market_events + res.num_signals +
-                                     res.num_orders + res.num_fills;
+    const std::size_t total_events =
+        res.num_market_events + res.num_signals + res.num_orders + res.num_fills;
 
     std::printf("engine benchmark (full pipeline)\n");
     std::printf("  bars              : %zu\n", n);
@@ -77,10 +76,8 @@ int main(int argc, char** argv) {
     std::printf("  total events      : %zu\n", total_events);
     std::printf("  elapsed           : %.4f s\n", secs);
     if (secs > 0.0) {
-        std::printf("  bars/sec          : %.0f\n",
-                    static_cast<double>(n) / secs);
-        std::printf("  events/sec        : %.0f\n",
-                    static_cast<double>(total_events) / secs);
+        std::printf("  bars/sec          : %.0f\n", static_cast<double>(n) / secs);
+        std::printf("  events/sec        : %.0f\n", static_cast<double>(total_events) / secs);
     }
     std::printf("  final equity      : %.2f\n", res.final_equity);
     std::printf("  sharpe            : %.4f\n", res.report.sharpe);
