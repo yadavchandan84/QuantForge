@@ -1,0 +1,41 @@
+[build-system]
+requires = ["scikit-build-core>=0.8", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "quantforge"
+version = "0.1.0"
+description = "Event-driven backtesting & trading simulator with a C++20 core"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "QuantForge" }]
+keywords = ["backtesting", "trading", "quant", "finance", "simulation"]
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+notebook = ["pandas>=1.3", "matplotlib>=3.4", "jupyter"]
+
+[tool.scikit-build]
+# The CMake project lives at the repo root; build only the Python module.
+cmake.version = ">=3.20"
+cmake.args = [
+    "-DQF_BUILD_PYTHON=ON",
+    "-DQF_BUILD_TESTS=OFF",
+    "-DQF_BUILD_BENCHMARKS=OFF",
+    "-DQF_ENABLE_WARNINGS=OFF",
+]
+wheel.packages = ["python/quantforge"]
+build-dir = "build/skbuild"
+
+[tool.scikit-build.cmake.define]
+CMAKE_BUILD_TYPE = "Release"
+
+# Note on Windows toolchain:
+# scikit-build-core picks a generator/compiler via CMake's defaults. On a
+# machine without MSVC, configure CMake to use the GCC/Ninja toolchain by
+# exporting before `pip install`:
+#   $env:CMAKE_GENERATOR = "Ninja"
+#   $env:CC  = "gcc"; $env:CXX = "g++"
+# (ensure gcc/g++/ninja are on PATH). On Linux/macOS the system compiler works
+# out of the box.
