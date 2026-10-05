@@ -73,9 +73,10 @@ std::optional<FillEvent> ExecutionHandler::execute(const OrderEvent& order,
         return std::nullopt;
     }
 
-    // Slippage against the taker.
+    // Slippage against the taker. Draw slippage before latency so the RNG
+    // consumption order is fixed and replay-stable.
     const Price fill_price =
-        slippage_->apply(reference, order.side, fill_qty, vol);
+        slippage_->apply(reference, order.side, fill_qty, vol, rng_);
 
     // Latency determines when the fill is observed.
     const Timestamp lat = latency_->sample(rng_);

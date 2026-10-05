@@ -73,8 +73,12 @@ class RandomLatency final : public LatencyModel {
 class SlippageModel {
   public:
     virtual ~SlippageModel() = default;
+    /// Returns the fill price. `rng` is the handler's single RNG stream; models
+    /// that need randomness draw from it so replay is reproducible, while
+    /// deterministic models simply ignore it.
     virtual Price apply(Price reference, Side side, Quantity fill_qty,
-                        Quantity available_volume) const = 0;
+                        Quantity available_volume,
+                        std::mt19937_64& rng) const = 0;
     virtual std::unique_ptr<SlippageModel> clone() const = 0;
 };
 
@@ -84,7 +88,8 @@ class FixedBpsSlippage final : public SlippageModel {
     explicit FixedBpsSlippage(double bps) : bps_(bps) {
         if (bps < 0.0) throw std::invalid_argument("slippage bps must be >= 0");
     }
-    Price apply(Price reference, Side side, Quantity, Quantity) const override {
+    Price apply(Price reference, Side side, Quantity, Quantity,
+                std::mt19937_64&) const override {
         const double frac = bps_ * 1e-4;
         return side == Side::Buy ? reference * (1.0 + frac)
                                  : reference * (1.0 - frac);
@@ -95,6 +100,34 @@ class FixedBpsSlippage final : public SlippageModel {
 
   private:
     double bps_;
+};
+
+/// Randomized slippage: draws an adverse move uniformly in [min_bps, max_bps].
+/// Because it consumes the RNG, it is the sharpest test of deterministic
+/// replay: identical seeds must reproduce identical fill prices.
+class RandomBpsSlippage final : public SlippageModel {
+  public:
+    RandomBpsSlippage(double min_bps, double max_bps)
+        : min_bps_(min_bps), max_bps_(max_bps) {
+        if (min_bps < 0.0 || max_bps < min_bps) {
+            throw std::invalid_argument(
+                "RandomBpsSlippage requires 0 <= min <= max");
+        }
+    }
+    Price apply(Price reference, Side side, Quantity, Quantity,
+                std::mt19937_64& rng) const override {
+        std::uniform_real_distribution<double> dist(min_bps_, max_bps_);
+        const double frac = dist(rng) * 1e-4;
+        return side == Side::Buy ? reference * (1.0 + frac)
+                                 : reference * (1.0 - frac);
+    }
+    std::unique_ptr<SlippageModel> clone() const override {
+        return std::make_unique<RandomBpsSlippage>(*this);
+    }
+
+  private:
+    double min_bps_;
+    double max_bps_;
 };
 
 /// Volume-based (square-root market impact) slippage. The adverse move scales
@@ -109,7 +142,7 @@ class VolumeSlippage final : public SlippageModel {
             throw std::invalid_argument("slippage coeff must be >= 0");
     }
     Price apply(Price reference, Side side, Quantity fill_qty,
-                Quantity available_volume) const override {
+                Quantity available_volume, std::mt19937_64&) const override {
         double participation = 1.0;
         if (available_volume > 0.0) {
             participation = std::clamp(fill_qty / available_volume, 0.0, 1.0);

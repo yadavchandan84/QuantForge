@@ -11,6 +11,7 @@ add_executable(quantforge_tests
     test_portfolio.cpp
     test_analytics.cpp
     test_engine_sweep.cpp
+    test_determinism.cpp
 )
 
 target_link_libraries(quantforge_tests

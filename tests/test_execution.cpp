@@ -46,18 +46,32 @@ ExecutionHandler makeHandler(std::unique_ptr<LatencyModel> lat,
 // ---- Slippage models (known-answer) -------------------------------------
 TEST(Slippage, FixedBpsAgainstTaker) {
     FixedBpsSlippage s(10.0);  // 10 bps
-    EXPECT_DOUBLE_EQ(s.apply(100.0, Side::Buy, 1, 0), 100.0 * 1.001);
-    EXPECT_DOUBLE_EQ(s.apply(100.0, Side::Sell, 1, 0), 100.0 * 0.999);
+    std::mt19937_64 rng(0);
+    EXPECT_DOUBLE_EQ(s.apply(100.0, Side::Buy, 1, 0, rng), 100.0 * 1.001);
+    EXPECT_DOUBLE_EQ(s.apply(100.0, Side::Sell, 1, 0, rng), 100.0 * 0.999);
 }
 
 TEST(Slippage, VolumeImpactScalesWithParticipation) {
     VolumeSlippage s(20.0);  // 20 bps coefficient
+    std::mt19937_64 rng(0);
     // Participation = 100/10000 = 0.01 -> sqrt = 0.1 -> impact 2 bps.
-    const Price buy = s.apply(100.0, Side::Buy, 100.0, 10000.0);
+    const Price buy = s.apply(100.0, Side::Buy, 100.0, 10000.0, rng);
     EXPECT_NEAR(buy, 100.0 * (1.0 + 2.0 * 1e-4), 1e-9);
     // Full participation -> sqrt(1) -> full 20 bps.
-    const Price full = s.apply(100.0, Side::Buy, 10000.0, 10000.0);
+    const Price full = s.apply(100.0, Side::Buy, 10000.0, 10000.0, rng);
     EXPECT_NEAR(full, 100.0 * (1.0 + 20.0 * 1e-4), 1e-9);
+}
+
+TEST(Slippage, RandomBpsIsDeterministicForSeed) {
+    RandomBpsSlippage s(5.0, 25.0);
+    std::mt19937_64 a(77), b(77);
+    for (int i = 0; i < 10; ++i) {
+        const Price pa = s.apply(100.0, Side::Buy, 1, 0, a);
+        const Price pb = s.apply(100.0, Side::Buy, 1, 0, b);
+        EXPECT_DOUBLE_EQ(pa, pb);
+        // Buy slippage is always adverse (>= reference).
+        EXPECT_GE(pa, 100.0);
+    }
 }
 
 // ---- Fee models (known-answer) ------------------------------------------
